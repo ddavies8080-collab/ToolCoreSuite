@@ -15,7 +15,7 @@ public class LogService : ILogService
         _logEventStream = logEventStream;
 
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
+            .MinimumLevel.Verbose()
             .WriteTo.File(
                 path: logFilePath,
                 rollingInterval: RollingInterval.Day,
@@ -66,6 +66,14 @@ public class LogService : ILogService
 
         _logEventStream.Publish(entry);
     }
+
+    public void General(string message, string memberName = "", int lineNumber = 0, string filePath = "")
+    {
+        CreateContext("GEN", memberName, lineNumber, filePath)
+            .Information(message);
+
+        PublishLiveEntry("GEN", message, memberName, lineNumber, filePath);
+    }
     public void Debug(string message, string memberName = "", int lineNumber = 0, string filePath = "")
     {
         CreateContext("DEB", memberName, lineNumber, filePath)
@@ -80,14 +88,6 @@ public class LogService : ILogService
             .Information(message);
 
         PublishLiveEntry("INF", message, memberName, lineNumber, filePath);
-    }
-
-    public void App(string message, string memberName = "", int lineNumber = 0, string filePath = "")
-    {
-        CreateContext("APP", memberName, lineNumber, filePath)
-            .Information(message);
-
-        PublishLiveEntry("APP", message, memberName, lineNumber, filePath);
     }
 
     public void Warning(string message, string memberName = "", int lineNumber = 0, string filePath = "")
@@ -112,6 +112,14 @@ public class LogService : ILogService
             .Error(ex, message);
 
         PublishLiveEntry("ERR", message, memberName, lineNumber, filePath, ex);
+    }
+
+    public void App(string message, string memberName = "", int lineNumber = 0, string filePath = "")
+    {
+        CreateContext("APP", memberName, lineNumber, filePath)
+            .Verbose(message);
+
+        PublishLiveEntry("APP", message, memberName, lineNumber, filePath);
     }
     public void CloseAndFlush()
     {

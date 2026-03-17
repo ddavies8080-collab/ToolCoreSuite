@@ -10,13 +10,13 @@ public interface ILogService
         [CallerLineNumber] int lineNumber = 0,
         [CallerFilePath] string filePath = "");
 
-    void Information(
-        string message,
-        [CallerMemberName] string memberName = "",
-        [CallerLineNumber] int lineNumber = 0,
-        [CallerFilePath] string filePath = "");
+    void General(
+    string message,
+    [CallerMemberName] string memberName = "",
+    [CallerLineNumber] int lineNumber = 0,
+    [CallerFilePath] string filePath = "");
 
-    void App(
+    void Information(
         string message,
         [CallerMemberName] string memberName = "",
         [CallerLineNumber] int lineNumber = 0,
@@ -36,6 +36,12 @@ public interface ILogService
 
     void Error(
         Exception ex,
+        string message,
+        [CallerMemberName] string memberName = "",
+        [CallerLineNumber] int lineNumber = 0,
+        [CallerFilePath] string filePath = "");
+
+    void App(
         string message,
         [CallerMemberName] string memberName = "",
         [CallerLineNumber] int lineNumber = 0,

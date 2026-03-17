@@ -6,22 +6,70 @@
              mc:Ignorable="d"
              d:DesignHeight="220"
              d:DesignWidth="800">
+
     <UserControl.Resources>
+
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Background" Value="#FFEAEAEA" />
+            <Setter Property="Foreground" Value="#FF333333" />
+            <Setter Property="BorderBrush" Value="#FFD6D6D6" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="Padding" Value="8,6" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+            <Setter Property="Focusable" Value="False" />
+        </Style>
+
+        <Style TargetType="DataGridCell">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="6,4" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#333333"/>
+        </Style>
+
         <Style TargetType="DataGridRow">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+
             <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#FFE6E6E6" />
+                    <Setter Property="TextBlock.Foreground" Value="#333333"/>
+                </Trigger>
+
                 <DataTrigger Binding="{Binding LogType}" Value="WAR">
                     <Setter Property="Background" Value="#FFF8E7B2" />
                 </DataTrigger>
+
                 <DataTrigger Binding="{Binding LogType}" Value="ERR">
                     <Setter Property="Background" Value="#FFF4C7C3" />
                     <Setter Property="FontWeight" Value="SemiBold" />
                 </DataTrigger>
+
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True" />
+                        <Condition Binding="{Binding LogType}" Value="WAR" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Background" Value="#FFF2DE9A" />
+                </MultiDataTrigger>
+
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True" />
+                        <Condition Binding="{Binding LogType}" Value="ERR" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Background" Value="#FFEAB7B2" />
+                </MultiDataTrigger>
             </Style.Triggers>
         </Style>
+
     </UserControl.Resources>
+
     <Border BorderBrush="#D0D0D0"
             BorderThickness="1"
-            Background="White">
+            Background="#FFF0F0F0">
 
         <DockPanel>
 
@@ -34,7 +82,8 @@
                 <TextBlock Text="Activity Log"
                            VerticalAlignment="Center"
                            FontSize="14"
-                           FontWeight="SemiBold" />
+                           FontWeight="SemiBold"
+                           Foreground="#FF333333" />
 
                 <Button Grid.Column="1"
                         Width="80"
@@ -47,36 +96,51 @@
                       Margin="8,0,8,8"
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      CanUserResizeRows="False"
+                      CanUserReorderColumns="False"
+                      CanUserSortColumns="False"
                       IsReadOnly="True"
-                      HeadersVisibility="Column"
-                      GridLinesVisibility="Horizontal"
+                      HeadersVisibility="None"
+                      GridLinesVisibility="None"
+                      HorizontalGridLinesBrush="#FFE0E0E0"
+                      VerticalGridLinesBrush="#00000000"
                       EnableRowVirtualization="True"
                       EnableColumnVirtualization="True"
-                      SelectionMode="Single">
+                      SelectionMode="Extended"
+                      SelectionUnit="FullRow"
+                      Background="#FFF7F7F7"
+                      BorderThickness="0"
+                      RowHeaderWidth="0"
+                      LostFocus="LogGrid_LostFocus"
+                      CopyingRowClipboardContent="LogGrid_CopyingRowClipboardContent">
+
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="" Width="30">
+                    <DataGridTemplateColumn Header=""
+                            Width="0"
+                            Visibility="Collapsed"
+                            CanUserSort="False"
+                            ClipboardContentBinding="{Binding LogTypeClipboard}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       FontWeight="Bold">
+                           VerticalAlignment="Center"
+                           FontWeight="Bold">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="ℹ" />
-                                            <Setter Property="Foreground" Value="#2F6FED" />
+                                            <Setter Property="Text" Value="" />
+                                            <Setter Property="Foreground" Value="Gray" />
 
                                             <Style.Triggers>
-
                                                 <DataTrigger Binding="{Binding LogType}" Value="WAR">
                                                     <Setter Property="Text" Value="⚠" />
-                                                    <Setter Property="Foreground" Value="#C98A00" />
+                                                    <Setter Property="Foreground" Value="Orange" />
                                                 </DataTrigger>
 
                                                 <DataTrigger Binding="{Binding LogType}" Value="ERR">
                                                     <Setter Property="Text" Value="✖" />
-                                                    <Setter Property="Foreground" Value="#C62828" />
+                                                    <Setter Property="Foreground" Value="Red" />
                                                 </DataTrigger>
-
                                             </Style.Triggers>
                                         </Style>
                                     </TextBlock.Style>
@@ -84,12 +148,50 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
+
                     <DataGridTextColumn Header="Time"
-                                        Width="110"
-                                        Binding="{Binding Timestamp, StringFormat=HH:mm:ss}" />
-                    <DataGridTextColumn Header="Message"
-                                        Width="*"
-                                        Binding="{Binding Message}" />
+                        x:Name="TimeColumn"
+                        Width="68"
+                        CanUserSort="False"
+                        Binding="{Binding Timestamp, StringFormat=HH:mm:ss.ff}" />
+
+                    <DataGridTemplateColumn Header="Message"
+                            Width="*"
+                            CanUserSort="False"
+                            ClipboardContentBinding="{Binding Message}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Margin="0,0,6,0"
+                               VerticalAlignment="Center"
+                               FontWeight="Bold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="" />
+                                                <Setter Property="Foreground" Value="Gray" />
+
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding LogType}" Value="WAR">
+                                                        <Setter Property="Text" Value="⚠" />
+                                                        <Setter Property="Foreground" Value="Orange" />
+                                                    </DataTrigger>
+
+                                                    <DataTrigger Binding="{Binding LogType}" Value="ERR">
+                                                        <Setter Property="Text" Value="✖" />
+                                                        <Setter Property="Foreground" Value="Red" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+
+                                    <TextBlock Text="{Binding Message}"
+                               VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
 

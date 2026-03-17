@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using Serilog.Core;
+using ToolCore;
 using ToolCore.Configuration.Services;
 using ToolCore.Logging.Services;
 using ToolCore.Services;
@@ -37,32 +40,46 @@ namespace ToolShell.Bootstrapper
             AppServices.Logger = new LogService(logFilePath, settings, AppServices.LogEventStream);
 
             //Log Base Startup Info
-            AppServices.Logger.Information("Application started.");
+            if (AppEnvironment.DevelopmentMode) { AppServices.Logger.Debug("DEBUG MODE"); }
+
+            AppServices.Logger.App("Application started.");
+
             if (createdDefaultSettings)
             {
                 AppServices.Logger.App("Default settings file created.");
+            } else {
+                AppServices.Logger.App($"Settings loaded from: {AppPaths.SettingsFile}");
             }
-            AppServices.Logger.App($"Settings loaded from: {AppPaths.SettingsFile}");
-            AppServices.Logger.Error($"LogRetentionDays: {AppServices.Configuration.Settings.LogRetentionDays}");
-            AppServices.Logger.Warning($"MaxLogFileSizeMB: {AppServices.Configuration.Settings.MaxLogFileSizeMB}");
+            
+            AppServices.Logger.App($"LogRetentionDays: {AppServices.Configuration.Settings.LogRetentionDays}");
+            AppServices.Logger.App($"MaxLogFileSizeMB: {AppServices.Configuration.Settings.MaxLogFileSizeMB}");
 
             //Load Form
             var mainWindow = new MainWindow();
             //Show all Logs
-            mainWindow.AppLogViewer.AllowedCategories = Array.Empty<string>();
+            if (AppEnvironment.DevelopmentMode)
+            {
+                //Show Debug Logs
+                mainWindow.AppLogViewer.AllowedLogTypes = Array.Empty<string>();
+            }
+            else
+            {
+                //Show user logs 
+                mainWindow.AppLogViewer.AllowedLogTypes = new[]
+                {
+                    "GEN",
+                    "WAR",
+                    "ERR"
+                };
+            }
 
-            //Show user logs 
-            //mainWindow.AppLogViewer.AllowedCategories = new[]
-            //{
-            //    "MainWindow.xaml"
-            //};
             app.MainWindow = mainWindow;
             mainWindow.Show();
                         
         }
         public void OnExit(ExitEventArgs e) {
             //Log App Exit Info
-            AppServices.Logger?.Information("Application exited.");
+            AppServices.Logger?.App("Application exited.");
             AppServices.Logger?.CloseAndFlush();
          }
         public void OnDispatcherUnhandledException(
