@@ -19,6 +19,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        Title = $"{AppInfo.ProductName} v{AppInfo.Version} - {AppInfo.CompanyName}";
     }
 
     private void GeneralLogButton_Click(object sender, RoutedEventArgs e)
